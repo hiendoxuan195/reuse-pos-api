@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.reusepos.mapper.BuybackItemMapper">
+
+    <resultMap id="buybackItemMap" type="com.example.reusepos.model.BuybackItem">
+        <id property="id" column="ID"/>
+        <result property="itemCode" column="ITEM_CODE"/>
+        <result property="name" column="NAME"/>
+        <result property="categoryId" column="CATEGORY_ID"/>
+        <result property="categoryName" column="CATEGORY_NAME"/>
+        <result property="purchasePrice" column="PURCHASE_PRICE"/>
+        <result property="sellingPrice" column="SELLING_PRICE"/>
+        <result property="condition" column="ITEM_CONDITION"/>
+        <result property="status" column="STATUS"/>
+        <result property="customerName" column="CUSTOMER_NAME"/>
+        <result property="purchasedAt" column="PURCHASED_AT"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+    </resultMap>
+
+    <sql id="selectWithCategory">
+        SELECT b.ID, b.ITEM_CODE, b.NAME, b.CATEGORY_ID, c.NAME AS CATEGORY_NAME,
+               b.PURCHASE_PRICE, b.SELLING_PRICE, b.ITEM_CONDITION, b.STATUS,
+               b.CUSTOMER_NAME, b.PURCHASED_AT, b.CREATED_AT, b.UPDATED_AT
+        FROM BUYBACK_ITEM b
+        LEFT JOIN ITEM_CATEGORY c ON b.CATEGORY_ID = c.ID
+    </sql>
+
+    <select id="findAll" resultMap="buybackItemMap">
+        <include refid="selectWithCategory"/>
+        ORDER BY b.ID DESC
+    </select>
+
+    <select id="findById" resultMap="buybackItemMap">
+        <include refid="selectWithCategory"/>
+        WHERE b.ID = #{id}
+    </select>
+
+    <select id="findByStatus" resultMap="buybackItemMap">
+        <include refid="selectWithCategory"/>
+        WHERE b.STATUS = #{status}
+        ORDER BY b.ID DESC
+    </select>
+
+    <select id="findByCategoryId" resultMap="buybackItemMap">
+        <include refid="selectWithCategory"/>
+        WHERE b.CATEGORY_ID = #{categoryId}
+        ORDER BY b.ID DESC
+    </select>
+
+    <insert id="insert" parameterType="com.example.reusepos.model.BuybackItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO BUYBACK_ITEM (ITEM_CODE, NAME, CATEGORY_ID, PURCHASE_PRICE, SELLING_PRICE,
+                                  ITEM_CONDITION, STATUS, CUSTOMER_NAME)
+        VALUES (#{itemCode}, #{name}, #{categoryId}, #{purchasePrice}, #{sellingPrice},
+                #{condition}, #{status}, #{customerName})
+    </insert>
+
+    <update id="update" parameterType="com.example.reusepos.model.BuybackItem">
+        UPDATE BUYBACK_ITEM SET
+            NAME = #{name},
+            CATEGORY_ID = #{categoryId},
+            PURCHASE_PRICE = #{purchasePrice},
+            SELLING_PRICE = #{sellingPrice},
+            ITEM_CONDITION = #{condition},
+            STATUS = #{status},
+            CUSTOMER_NAME = #{customerName},
+            UPDATED_AT = CURRENT_TIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE BUYBACK_ITEM SET STATUS = #{status}, UPDATED_AT = CURRENT_TIMESTAMP
+        WHERE ID = #{id}
+    </update>
+
+</mapper>
